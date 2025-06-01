@@ -122,7 +122,17 @@
     const totalCountEl = document.getElementById("totalCount");
     const todayBoardEl = document.getElementById("todayBoard");
     const allTimeBoardEl = document.getElementById("allTimeBoard");
-
+    function createButtons() {
+      const buttonContainer = document.getElementById('buttons');
+      buttonContainer.innerHTML = ''; // Clear any existing buttons
+      
+      curseWords.forEach(wordObj => {
+        const btn = document.createElement('button');
+        btn.className = 'curse-btn'; // Added class for styling
+        btn.textContent = wordObj.label;
+        btn.onclick = () => handleCurse(wordObj);
+        buttonContainer.appendChild(btn);
+      });
     // Improved date handling
     function getTodayKey() {
       const now = new Date();
@@ -233,12 +243,9 @@
     }
 
     // Create buttons
-    curseWords.forEach(wordObj => {
-      const btn = document.createElement("button");
-      btn.textContent = wordObj.label;
-      btn.onclick = () => handleCurse(wordObj);
-      buttonContainer.appendChild(btn);
-    });
+    window.onload = function() {
+      createButtons();
+      updateUI();
 
     // Initial UI update
     updateUI();
