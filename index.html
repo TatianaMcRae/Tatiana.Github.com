@@ -12,7 +12,7 @@
       max-width: 800px;
       margin: 0 auto;
     }
-    button {
+    button.curse-btn {
       margin: 10px;
       padding: 15px 25px;
       font-size: 18px;
@@ -23,7 +23,7 @@
       cursor: pointer;
       transition: background-color 0.2s;
     }
-    button:hover {
+    button.curse-btn:hover {
       background-color: #cc0000;
     }
     .leaderboards {
@@ -70,10 +70,17 @@
       flex-wrap: wrap;
       justify-content: center;
       gap: 10px;
+      margin: 20px 0;
     }
     .reset-btn {
       background-color: #666;
       margin-top: 30px;
+      padding: 10px 20px;
+      font-size: 16px;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
     }
     .reset-btn:hover {
       background-color: #444;
@@ -85,6 +92,7 @@
   <div class="counters">
     <p>Today: <strong><span id="todayCount">0</span></strong> | Total: <strong><span id="totalCount">0</span></strong></p>
   </div>
+  
   <div id="buttons"></div>
 
   <div class="leaderboards">
@@ -101,7 +109,7 @@
   <button class="reset-btn" onclick="resetData()">Reset All Data</button>
 
   <script>
-    // Webhook URL (keep this if you're okay with it being client-side)
+    // Webhook URL
     const webhookURL = "https://discord.com/api/webhooks/1378646229256241222/6BllgbinjkqsWmYFl7Chop-RGRUdTGOjwiPrOVZxenAMKGCrI3ziok791OPVjL9qXBJZ";
 
     const curseWords = [
@@ -117,22 +125,11 @@
     ];
 
     // DOM elements
-    const buttonContainer = document.getElementById("buttons");
     const todayCountEl = document.getElementById("todayCount");
     const totalCountEl = document.getElementById("totalCount");
     const todayBoardEl = document.getElementById("todayBoard");
     const allTimeBoardEl = document.getElementById("allTimeBoard");
-    function createButtons() {
-      const buttonContainer = document.getElementById('buttons');
-      buttonContainer.innerHTML = ''; // Clear any existing buttons
-      
-      curseWords.forEach(wordObj => {
-        const btn = document.createElement('button');
-        btn.className = 'curse-btn'; // Added class for styling
-        btn.textContent = wordObj.label;
-        btn.onclick = () => handleCurse(wordObj);
-        buttonContainer.appendChild(btn);
-      });
+
     // Improved date handling
     function getTodayKey() {
       const now = new Date();
@@ -210,8 +207,15 @@
       // Save and update
       saveData();
       
-      // Send webhook (with error handling)
+      // Send webhook
       sendWebhook(wordObj.full);
+      
+      // Visual feedback
+      const btn = document.querySelector(`button[data-word="${wordObj.full}"]`);
+      if (btn) {
+        btn.style.transform = 'scale(0.95)';
+        setTimeout(() => { btn.style.transform = 'scale(1)'; }, 100);
+      }
     }
 
     // Send webhook with error handling
@@ -243,11 +247,25 @@
     }
 
     // Create buttons
+    function createButtons() {
+      const buttonContainer = document.getElementById('buttons');
+      buttonContainer.innerHTML = '';
+      
+      curseWords.forEach(wordObj => {
+        const btn = document.createElement('button');
+        btn.className = 'curse-btn';
+        btn.textContent = wordObj.label;
+        btn.setAttribute('data-word', wordObj.full);
+        btn.onclick = () => handleCurse(wordObj);
+        buttonContainer.appendChild(btn);
+      });
+    }
+
+    // Initialize the app
     window.onload = function() {
       createButtons();
       updateUI();
     };
-    // Initial UI update
   </script>
 </body>
 </html>
