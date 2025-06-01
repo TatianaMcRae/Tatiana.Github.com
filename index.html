@@ -24,16 +24,50 @@
     button:hover {
       background-color: #cc0000;
     }
+    .leaderboards {
+      margin-top: 40px;
+      display: flex;
+      justify-content: center;
+      gap: 50px;
+    }
+    .board {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      width: 300px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .board h2 {
+      margin-top: 0;
+    }
+    .board ul {
+      list-style: none;
+      padding: 0;
+    }
+    .board li {
+      margin: 5px 0;
+    }
   </style>
 </head>
 <body>
   <h1>Jackie's Curse Counter</h1>
   <div id="buttons"></div>
 
-  <script>
-     const webhookURL = "https://discord.com/api/webhooks/1378646229256241222/6BllgbinjkqsWmYFl7Chop-RGRUdTGOjwiPrOVZxenAMKGCrI3ziok791OPVjL9qXBJZ";
+  <div class="leaderboards">
+    <div class="board">
+      <h2>Today's Top Curses</h2>
+      <ul id="todayBoard"></ul>
+    </div>
+    <div class="board">
+      <h2>All-Time Top Curses</h2>
+      <ul id="allTimeBoard"></ul>
+    </div>
+  </div>
 
-      const curseWords = [
+  <script>
+    const webhookURL = "https://discord.com/api/webhooks/1378646229256241222/6BllgbinjkqsWmYFl7Chop-RGRUdTGOjwiPrOVZxenAMKGCrI3ziok791OPVjL9qXBJZ";
+
+    const curseWords = [
       { label: "f*ck", full: "fuck" },
       { label: "sh*t", full: "shit" },
       { label: "b*tch", full: "bitch" },
@@ -50,7 +84,8 @@
     let today = new Date().toLocaleDateString();
     let data = JSON.parse(localStorage.getItem("curseData")) || {
       total: 0,
-      today: { date: today, count: 0 }
+      today: { date: today, count: 0, words: {} },
+      allTime: { words: {} }
     };
 
     function updateCounts() {
@@ -58,22 +93,55 @@
       if (data.today.date !== now) {
         data.today.date = now;
         data.today.count = 0;
+        data.today.words = {};
       }
     }
 
+    function updateLeaderboard() {
+      const todayBoard = document.getElementById("todayBoard");
+      const allTimeBoard = document.getElementById("allTimeBoard");
+
+      todayBoard.innerHTML = "";
+      allTimeBoard.innerHTML = "";
+
+      const todaySorted = Object.entries(data.today.words || {})
+        .sort((a, b) => b[1] - a[1]);
+
+      const allTimeSorted = Object.entries(data.allTime.words || {})
+        .sort((a, b) => b[1] - a[1]);
+
+      todaySorted.forEach(([word, count]) => {
+        const li = document.createElement("li");
+        li.textContent = `${word}: ${count}`;
+        todayBoard.appendChild(li);
+      });
+
+      allTimeSorted.forEach(([word, count]) => {
+        const li = document.createElement("li");
+        li.textContent = `${word}: ${count}`;
+        allTimeBoard.appendChild(li);
+      });
+    }
+
     updateCounts();
+    updateLeaderboard();
 
     curseWords.forEach(wordObj => {
       const btn = document.createElement("button");
       btn.textContent = wordObj.label;
       btn.onclick = () => {
         updateCounts();
+
         data.total += 1;
         data.today.count += 1;
+
+        data.today.words[wordObj.full] = (data.today.words[wordObj.full] || 0) + 1;
+        data.allTime.words[wordObj.full] = (data.allTime.words[wordObj.full] || 0) + 1;
+
         localStorage.setItem("curseData", JSON.stringify(data));
 
         const msg = {
-          content: `Jackie said "${wordObj.full}". The curse count for today is ${data.today.count}. The total curse count for all time is ${data.total}.`
+          content: `Jackie said ${wordObj.full}. The curse count for today is ${data.today.count}. The total curse count for all time is ${data.total}.`
         };
 
         fetch(webhookURL, {
@@ -85,6 +153,7 @@
         });
 
         alert(msg.content);
+        updateLeaderboard();
       };
       buttonContainer.appendChild(btn);
     });
