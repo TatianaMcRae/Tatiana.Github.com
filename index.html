@@ -41,7 +41,8 @@
       { label: "d*ck", full: "dick" },
       { label: "r-word", full: "rape" },
       { label: "slur-HR", full: "Hard R" },
-      { label: "slur-SR", full: "Soft R" }
+      { label: "slur-SR", full: "Soft R" },
+      { label: "G-slur", full: "a general slur" }
     ];
 
     const buttonContainer = document.getElementById("buttons");
@@ -72,7 +73,7 @@
         localStorage.setItem("curseData", JSON.stringify(data));
 
         const msg = {
-          content: `Jackie said "${wordObj.full}". The curse count for today is ${data.today.count}, and The total curse count for all time is ${data.total}.`
+          content: `Jackie said "${wordObj.full}". The curse count for today is ${data.today.count}. The total curse count for all time is ${data.total}.`
         };
 
         fetch(webhookURL, {
